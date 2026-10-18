@@ -1,0 +1,39 @@
+{
+  "name": "macos-menubar-redesign",
+  "version": "2.0.0",
+  "description": "问 · macOS 菜单栏（状态栏）重设计 — 设计规范与可交互原型（配置驱动、零依赖、可离线）",
+  "keywords": [
+    "macos",
+    "menu-bar",
+    "status-bar",
+    "redesign",
+    "design-system",
+    "prototype",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Test2049micro/macos-menubar-redesign",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Test2049micro/macos-menubar-redesign.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Test2049micro/macos-menubar-redesign/issues"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/smoke.js",
+    "dev": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "index.html",
+    "src/",
+    "dist/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ]
+}

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="description" content="问 · macOS 菜单栏（状态栏）重设计 — 设计规范与可交互原型：五区分区、溢出折叠、统一模板图标、状态徽标、全天候状态矩阵与多屏幕适配。"/>
+<meta name="color-scheme" content="dark light"/>
+<title>问 · macOS 菜单栏重设计</title>
+<!-- build:css src/css/menubar.css -->
+<link rel="stylesheet" href="src/css/menubar.css"/>
+<!-- endbuild -->
+</head>
+<body class="density-regular">
+
+<!-- ======== SVG 符号库（示意重绘，内联以保证 file:// 直开可用） ======== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-apple" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.6 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7.9 1.5 1.9 2.6 1.9 1 0 1.4-.7 2.7-.7 1.2 0 1.6.7 2.7.7 1.1 0 1.8-1 2.5-1.9.5-.7.8-1.4 1-2.2-.1 0-2.2-.9-2.2-3.1zM14.9 5.9c.5-.7.9-1.6.8-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.8 2.5.9.1 1.9-.4 2.4-1.1z"/>
+  </symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.6 12.4a9.5 9.5 0 0 1 12.8 0"/><path d="M8.7 15.8a5 5 0 0 1 6.6 0"/>
+    <circle cx="12" cy="19" r="1.15" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9.5v5h3.5L13 19V5L7.5 9.5H4z" fill="currentColor" stroke="none"/>
+    <path d="M16.3 9.4a4 4 0 0 1 0 5.2"/><path d="M18.8 7a7.6 7.6 0 0 1 0 10"/>
+  </symbol>
+  <symbol id="i-gpt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <ellipse cx="12" cy="12" rx="9.6" ry="4.1"/>
+    <ellipse cx="12" cy="12" rx="9.6" ry="4.1" transform="rotate(60 12 12)"/>
+    <ellipse cx="12" cy="12" rx="9.6" ry="4.1" transform="rotate(120 12 12)"/>
+  </symbol>
+  <symbol id="i-claude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+    <path d="M14.6 12h6.6M13.3 9.75l3.3-5.72M10.7 9.75L7.4 4.03M9.4 12H2.8M10.7 14.25L7.4 19.97M13.3 14.25l3.3 5.72"/>
+  </symbol>
+  <symbol id="i-copilot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+    <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M12 7.5a4.5 4.5 0 1 0 4.5 4.5"/>
+  </symbol>
+  <symbol id="i-cat" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2.8c-4.4 0-8 3.5-8 7.8 0 4.3 3.6 7.8 8 7.8s8-3.5 8-7.8c0-4.3-3.6-7.8-8-7.8z"/>
+    <path d="M7 3.4l1.9 3.7-3.5-.5zM17 3.4l-1.9 3.7 3.5-.5z"/>
+  </symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+    <circle cx="6.5" cy="5.5" r="2.2"/><circle cx="6.5" cy="18.5" r="2.2"/><circle cx="17.5" cy="9.5" r="2.2"/>
+    <path d="M6.5 7.7v8.6"/><path d="M8.7 5.5h4.3a3.2 3.2 0 0 1 3.2 3.2v.3"/><path d="M17.5 11.7v2.4a3.2 3.2 0 0 1-3.2 3.2h-1.6"/>
+  </symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <path d="M8 3v4.5M11.5 3v4.5M15 3v4.5"/><path d="M8 7.5a3.5 3.5 0 0 0 7 0"/><path d="M11.5 11v10"/>
+  </symbol>
+  <symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+    <circle cx="12" cy="12" r="8.3"/>
+    <circle cx="9.2" cy="10.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="14.8" cy="10.2" r="1.05" fill="currentColor" stroke="none"/>
+    <path d="M8.6 14.6a4.2 4.2 0 0 0 6.8 0" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2.2l2.3 7 7 2.3-7 2.3-2.3 7-2.3-7-7-2.3 7-2.3 2.3-7z"/>
+  </symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+    <rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9.5 20.5h5M12 16.5v4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+    <path d="M4.5 4.5h7l8 8-7 7-8-8v-7z"/><circle cx="8.4" cy="8.4" r="1.3" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6.5L4.5 12 9 17.5M15 6.5L19.5 12 15 17.5"/>
+  </symbol>
+  <symbol id="i-switch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+    <rect x="2.6" y="7" width="18.8" height="10" rx="5"/><circle cx="16.6" cy="12" r="2.7" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"/>
+  </symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>
+  </symbol>
+  <symbol id="i-wechat" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd">
+    <path d="M9.2 3.6a6.4 6.4 0 0 0-6.4 6.4c0 1.7.9 3.3 2.3 4.3l-.5 2.1 2.3-1.1c.7.2 1.4.3 2.2.3h.4a5.6 5.6 0 0 1-.2-1.5c0-3.2 2.9-5.8 6.6-5.8.2 0 .4 0 .6.05-.7-2.6-3.4-4.75-6.3-4.75z"/>
+    <path d="M21.6 14.2a5.2 5.2 0 0 0-5.2-5.2 5.2 5.2 0 0 0-5.2 5.2 5.2 5.2 0 0 0 5.2 5.2c.7 0 1.4-.2 2-.4l2 .9-.4-1.8a5 5 0 0 0 1.6-3.9z"/>
+    <circle cx="7" cy="8.8" r=".95"/><circle cx="11.2" cy="8.8" r=".95"/><circle cx="14" cy="12.8" r=".85"/><circle cx="17.8" cy="12.8" r=".85"/>
+  </symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <rect x="3" y="4.2" width="18" height="5.6" rx="2.8"/><circle cx="8" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+    <rect x="3" y="14.2" width="18" height="5.6" rx="2.8"/><circle cx="16" cy="17" r="1.5" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20.5 20.5"/>
+  </symbol>
+  <symbol id="i-pinup" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 15.5V4.5M8.5 8L12 4.5 15.5 8"/>
+    <path d="M5 13.5v4.7a1.8 1.8 0 0 0 1.8 1.8h10.4a1.8 1.8 0 0 0 1.8-1.8v-4.7"/>
+  </symbol>
+  <symbol id="i-letter-s" viewBox="0 0 24 24">
+    <text x="12" y="16.8" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor" font-family="-apple-system,'Helvetica Neue',sans-serif">S</text>
+  </symbol>
+  <symbol id="i-letter-m" viewBox="0 0 24 24">
+    <text x="12" y="16.8" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor" font-family="-apple-system,'Helvetica Neue',sans-serif">M</text>
+  </symbol>
+  <symbol id="i-letter-w" viewBox="0 0 24 24">
+    <text x="12" y="16.8" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor" font-family="-apple-system,'Helvetica Neue',sans-serif">W</text>
+  </symbol>
+  <symbol id="i-letter-z" viewBox="0 0 24 24">
+    <text x="12" y="16.8" text-anchor="middle" font-size="12.5" font-weight="800" fill="currentColor" font-family="-apple-system,'Helvetica Neue',sans-serif">Z</text>
+  </symbol>
+  <symbol id="i-dock-finder" viewBox="0 0 24 24" fill="none">
+    <path d="M7 13.2a5 5 0 0 0 10 0" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+    <circle cx="9" cy="9.6" r="1.1" fill="#fff"/><circle cx="15" cy="9.6" r="1.1" fill="#fff"/>
+  </symbol>
+  <symbol id="i-dock-safari" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="8.6" stroke="#fff" stroke-width="1.6"/>
+    <path d="M15.8 8.2l-2.1 5.5-5.5 2.1 2.1-5.5 5.5-2.1z" fill="#fff"/>
+  </symbol>
+  <symbol id="i-dock-terminal" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.5 8l3.5 4-3.5 4M13 16.5h4.5"/>
+  </symbol>
+  <symbol id="i-dock-code" viewBox="0 0 24 24" fill="#fff">
+    <path d="M9.2 5.6L4.4 12l4.8 6.4V5.6zM14.8 5.6L19.6 12l-4.8 6.4V5.6z" opacity=".95"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+
+<!-- ======== 页头 ======== -->
+<header>
+  <div class="kicker">UI REDESIGN · macOS MENU BAR · OPEN SOURCE</div>
+  <h1>问 · macOS 菜单栏（状态栏）重设计</h1>
+  <p class="lede">依据本机菜单栏截图诊断：右侧 21 个条目并列堆叠、16 个第三方图标风格混杂、同时存在「80% n/a」与「69%」两个电池指示（其一已失效）。新方案以「分区 · 折叠 · 统一 · 徽标」为核心，将右侧可见条目从 21 个压缩至 12 个，同时保证全部原有功能可达；并覆盖一天中不同时候、任务与系统状态变化下的表现（04 状态矩阵），以及多屏幕配置下的行为（05 多屏幕适配）。</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="外观">
+      <button type="button" class="seg__btn seg__btn--active" data-theme="auto" aria-pressed="true">跟随系统</button>
+      <button type="button" class="seg__btn" data-theme="dark" aria-pressed="false">深色</button>
+      <button type="button" class="seg__btn" data-theme="light" aria-pressed="false">浅色</button>
+    </div>
+    <div class="seg" role="group" aria-label="密度">
+      <button type="button" class="seg__btn seg__btn--active" data-density="regular" aria-pressed="true">宽松 28pt</button>
+      <button type="button" class="seg__btn" data-density="compact" aria-pressed="false">紧凑 24pt</button>
+    </div>
+    <button type="button" class="gbtn" id="annoBtn" aria-pressed="false">显示标注</button>
+    <button type="button" class="gbtn" id="exportBtn">导出配置</button>
+    <button type="button" class="gbtn" id="resetBtn">重置演示</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ======== 01 问题诊断 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">01</span>
+    <span class="sec__title">问题诊断</span>
+    <span class="sec__desc">来自截图的四项结构性问题</span>
+  </div>
+  <div class="grid-4">
+    <div class="card">
+      <h3>密度失控</h3>
+      <p>右侧 21 个条目并列，第三方图标 16 个；扫视一条状态信息，平均需要跨越 20 余个视觉元素，误点率高。</p>
+      <span class="card__evi">21 项 · 16 个第三方图标</span>
+    </div>
+    <div class="card">
+      <h3>风格混杂</h3>
+      <p>图标尺寸在 14–18px 间浮动，字母、图形、文字三种形态混排；缺少统一栅格与间距节奏，无法形成空间记忆。</p>
+      <span class="card__evi">3 种尺寸 · 3 种形态</span>
+    </div>
+    <div class="card">
+      <h3>状态失效</h3>
+      <p>「80% n/a」与「69%」两个电池指示并存，前者已失效却仍占据黄金位置，直接导致电量误判。</p>
+      <span class="card__evi">2 处电池 · 1 处失效</span>
+    </div>
+    <div class="card">
+      <h3>无溢出机制</h3>
+      <p>应用随装随加，菜单栏只能持续变挤；没有收纳区、没有优先级、没有置顶管理，增长不可持续。</p>
+      <span class="card__evi">0 收纳能力</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 02 现状还原 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">02</span>
+    <span class="sec__title">现状还原</span>
+    <span class="sec__desc">按截图重绘 · 2026-10-16 09:26</span>
+  </div>
+  <div class="mock__label">
+    <span class="tag tag--bad">现状</span>
+    <span class="mock__desc">右侧 21 个条目 · 第三方图标 16 个 · 双电池指示 · 风格混杂</span>
+  </div>
+  <div class="screen" id="legacyMock"><div class="screen__wall"></div></div>
+  <p class="mock__cap"><b>观察：</b>右侧条目横向铺满约 900px，图标尺寸与形态各异；「拼」「80% n/a」「额度」等文字与图形混排；失效电池指示与真实电量并存。</p>
+</section>
+
+<!-- ======== 03 重新设计 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">03</span>
+    <span class="sec__title">重新设计</span>
+    <span class="sec__desc">五区分隔 · 溢出折叠 · 统一模板图标 · 状态徽标</span>
+  </div>
+  <div class="mock__label">
+    <span class="tag tag--good">重新设计</span>
+    <span class="mock__desc">右侧 12 个条目（含 1 个折叠芯片），第三方图标 4 个，7 项收入溢出区</span>
+  </div>
+  <div class="screen" id="mainMock"><div class="screen__wall"></div></div>
+  <p class="mock__cap"><b>演示交互：</b>点击工具区图标可将其收入溢出区；点击「+7」展开管理面板并置顶条目（上限 3 个）；右上角可切换外观、密度与标注。<b>设计要点：</b>「额度」等详情信息移入控制中心面板，不再占用菜单栏。</p>
+  <div class="legend">
+    <div class="lg"><b class="lg__num">1</b><div><strong>五区分隔</strong>右侧按功能分为系统 / 输入法 / 通信 / 工具 / 托盘五区，1pt 细线 + 8pt 间距，建立稳定空间记忆。</div></div>
+    <div class="lg"><b class="lg__num">2</b><div><strong>溢出折叠</strong>低优先级工具收入「+N」芯片，点击展开管理面板，支持一键置顶与还原。</div></div>
+    <div class="lg"><b class="lg__num">3</b><div><strong>统一模板图标</strong>全部 16pt、同一视觉重量与命中区域；品牌识别交由悬停提示传达。</div></div>
+    <div class="lg"><b class="lg__num">4</b><div><strong>状态徽标</strong>运行中 = 呼吸圆点（#30D158），未读 = 数字徽标（#FF3B30），以最小面积传递最高频信息。</div></div>
+    <div class="lg"><b class="lg__num">5</b><div><strong>移除失效项</strong>删除已失效的「80% n/a」重复电池指示，只保留真实电量 69%。</div></div>
+    <div class="lg"><b class="lg__num">6</b><div><strong>中文时钟</strong>默认「10月16日 周五 09:26」紧凑格式（原型中为实时演示），可在设置中切换。</div></div>
+  </div>
+</section>
+
+<!-- ======== 04 全天候状态矩阵 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">04</span>
+    <span class="sec__title">全天候状态矩阵</span>
+    <span class="sec__desc">12 个典型时候与系统状态下的设计响应</span>
+  </div>
+  <p class="lede" style="margin-bottom:6px">菜单栏是常驻界面，任何时间、任何系统状态下都会出现。以下矩阵覆盖一天中的不同时候、任务与通知的变化、系统与容量的变化；所有迷你视图同样跟随页头的外观与密度切换。</p>
+  <div id="matrix"></div>
+</section>
+
+<!-- ======== 05 多屏幕适配 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">05</span>
+    <span class="sec__title">多屏幕适配</span>
+    <span class="sec__desc">状态在哪看 · 菜单跟谁走</span>
+  </div>
+  <p class="lede" style="margin-bottom:6px">多屏幕时菜单栏要回答两个问题：<b>状态在哪看、菜单跟谁走</b>。设计规则：应用菜单只属于主屏（焦点屏）；状态信息在所有屏幕同源可见；任何屏幕宽度不足时优先折叠，绝不挤压图标。</p>
+  <div id="multiscreen"></div>
+  <table class="tbl" style="margin-top:20px">
+    <thead>
+      <tr><th style="width:180px">屏幕配置</th><th>菜单栏行为</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>单屏</td><td>完整菜单栏：应用菜单 + 五区状态，全量显示（基准形态）。</td></tr>
+      <tr><td>双屏（默认）</td><td>主屏：应用菜单 + 五区；副屏：纯状态条，五区同源、无应用菜单。可在设置中为副屏开启应用菜单。</td></tr>
+      <tr><td>三屏及以上</td><td>规则同双屏，所有副屏状态条内容一致；Dock 跟随指针所在屏幕（系统默认，设计不干预）。</td></tr>
+      <tr><td>竖屏副屏</td><td>状态区右对齐不变；宽度不足时按「系统 → 时钟 → 通信 → 工具」顺序收缩，保留系统与时钟。</td></tr>
+      <tr><td>全屏应用</td><td>该屏菜单栏自动隐藏，指针移至顶部临时呼出；其余屏幕完全不受影响。</td></tr>
+      <tr><td>远程会话（UU远程等）</td><td>收敛为单一连接徽标：圆点表示连接质量（绿 / 琥珀 / 红），不堆叠多个图标。</td></tr>
+      <tr><td>不同分辨率与缩放</td><td>图标与间距按 0.5× / 1× / 2× 缩放；栏高提供 24pt（紧凑）/ 28pt（宽松）两档。</td></tr>
+      <tr><td>刘海屏</td><td>状态区整体避开刘海安全区，五区分区顺序与间距保持不变；亦可采用 Thaw 式「次级状态栏」双行方案。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ======== 06 关键差异 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">06</span>
+    <span class="sec__title">关键差异</span>
+    <span class="sec__desc">量化对比</span>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat__num"><span class="stat__from">21</span><span class="stat__arrow">→</span><span class="stat__to">12</span></div>
+      <div class="stat__lbl">右侧可见条目（含 1 个折叠芯片）</div>
+      <span class="stat__delta">-43%</span>
+    </div>
+    <div class="stat">
+      <div class="stat__num"><span class="stat__from">16</span><span class="stat__arrow">→</span><span class="stat__to">4</span></div>
+      <div class="stat__lbl">可见的第三方应用图标</div>
+      <span class="stat__delta">-75%</span>
+    </div>
+    <div class="stat">
+      <div class="stat__num"><span class="stat__from">2 处</span><span class="stat__arrow">→</span><span class="stat__to">1 处</span></div>
+      <div class="stat__lbl">电池指示（移除失效重复项）</div>
+      <span class="stat__delta">-50%</span>
+    </div>
+    <div class="stat">
+      <div class="stat__num"><span class="stat__from">0</span><span class="stat__arrow">→</span><span class="stat__to">7 项</span></div>
+      <div class="stat__lbl">可收纳条目（溢出区管理）</div>
+      <span class="stat__delta">新增能力</span>
+    </div>
+  </div>
+  <p class="mock__cap">视觉密度显著下降，全部原有功能仍可达：低优先级工具收入溢出区，一次性开关与详情类信息移入控制中心。</p>
+</section>
+
+<!-- ======== 07 设计原则 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">07</span>
+    <span class="sec__title">设计原则</span>
+    <span class="sec__desc">四条贯穿方案的规则</span>
+  </div>
+  <div class="grid-4">
+    <div class="card">
+      <h3>分区先于堆叠</h3>
+      <p>按「系统 / 输入法 / 通信 / 工具 / 托盘」聚类，区间以 1pt 细线分隔。扫视成本随分区数量下降，而非图标数量上升。</p>
+    </div>
+    <div class="card">
+      <h3>默认克制，按需展开</h3>
+      <p>工具区最多置顶 3 个；其余收入「+N」芯片，点击展开管理面板，支持一键置顶、还原与上限提示。</p>
+    </div>
+    <div class="card">
+      <h3>一套视觉语言</h3>
+      <p>统一 16pt 模板图标、统一 20×20pt 命中区域、统一 8pt 区间距。菜单栏回归「状态」，而非应用广告牌。</p>
+    </div>
+    <div class="card">
+      <h3>状态即徽标</h3>
+      <p>运行中 = 呼吸圆点，未读 = 数字徽标。用最小视觉面积传达最高频信息，避免整块彩色图标造成的噪音。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 08 分区与优先级规范 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">08</span>
+    <span class="sec__title">分区与优先级规范</span>
+    <span class="sec__desc">可直接落地的结构定义</span>
+  </div>
+  <table class="tbl">
+    <thead>
+      <tr><th style="width:110px">分区</th><th>内容</th><th>规则</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>系统区</td><td>Wi-Fi、声音、电池</td><td>P0 常驻，单色渲染；电池显示百分比，充电时绿色；点击展开合并面板</td></tr>
+      <tr><td>输入法区</td><td>当前输入法（如「拼」）</td><td>中文输入时高亮，英文输入时弱化；不占用独立图标</td></tr>
+      <tr><td>通信区</td><td>有未读消息的应用</td><td>数字徽标 ≤ 99；无未读时收入溢出区，不常驻</td></tr>
+      <tr><td>工具区</td><td>AI / 开发工具</td><td>最多 3 个置顶；运行中任务优先占位；其余进「+N」</td></tr>
+      <tr><td>托盘区</td><td>聚焦搜索、控制中心、日期时间</td><td>始终可见；时钟默认中文紧凑格式，可在设置切换</td></tr>
+    </tbody>
+  </table>
+  <div class="tiers">
+    <div class="tier tier--p0"><span class="tier__key">P0</span><p><b>常驻不可折叠：</b>系统区、托盘区、时钟。任何密度与屏幕配置下都保持可见，保证基础状态随时可读。</p></div>
+    <div class="tier tier--p1"><span class="tier__key">P1</span><p><b>条件可见：</b>输入法（中文输入时）、有未读的通信应用、正在运行任务的工具——出现即占据工具区空位。</p></div>
+    <div class="tier tier--p2"><span class="tier__key">P2</span><p><b>可折叠：</b>其余第三方工具默认收入溢出区，用户可手动置顶（≤3 个），上限满时给出明确提示。</p></div>
+  </div>
+</section>
+
+<!-- ======== 09 交互行为与技术映射 ======== -->
+<section class="sec">
+  <div class="sec__head">
+    <span class="sec__idx">09</span>
+    <span class="sec__title">交互行为与技术映射</span>
+    <span class="sec__desc">行为规格与实现路径</span>
+  </div>
+  <div class="cols-2">
+    <div class="panel">
+      <h3>交互行为</h3>
+      <ul>
+        <li><b>悬停 —</b> 120ms 内显示圆角高亮底与名称/状态提示（仅支持 hover 的设备）。</li>
+        <li><b>点击「+N」 —</b> 180ms 展开管理面板，列出图标、名称、状态与置顶按钮。</li>
+        <li><b>置顶 —</b> 图标回到工具区；达到 3 个上限时提示先取消一个。</li>
+        <li><b>键盘 —</b> 全部交互可 Tab 触达，Enter/Space 触发，Esc 关闭面板，焦点在面板内圈定。</li>
+        <li><b>徽标更新 —</b> 数字变化时缩放反馈；运行圆点以 1.8s 周期呼吸。</li>
+        <li><b>长按 / 右键 —</b> 快速设置（亮度、音量、勿扰），与系统既有行为保持一致。</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>技术映射（macOS 原生）</h3>
+      <ul>
+        <li><b>NSStatusItem —</b> variable length 布局，五区用固定间距分隔线实现。</li>
+        <li><b>SF Symbols —</b> template 渲染模式，自动适配深/浅外观与高对比度。</li>
+        <li><b>溢出管理 —</b> NSMenu / NSPopover 承载折叠项，参考 Bartender / Ice 式交互范式。</li>
+        <li><b>徽标 —</b> NSStatusBarButton 子视图叠加，配合 NSWorkspace 通知更新状态。</li>
+        <li><b>多屏幕 —</b> 按 NSScreen 为每屏注册状态条；主从屏共享同一状态源，保证同源同步。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <span>原型说明：基于本机菜单栏截图（2026-10-16 09:26）重绘，图标为示意图形，不代表官方资源；「重新设计」中的时钟为实时演示。本项目为设计提案，不调用任何 macOS 私有 API。</span>
+  <span>度量参考：栏高 28pt（宽松）/ 24pt（紧凑）· 图标 16pt · 命中区域 20×20pt · 区间距 8pt · 分隔线 1pt @ 18% · MIT License</span>
+</footer>
+
+</div><!-- /wrap -->
+
+<noscript>
+  <div style="max-width:1140px;margin:0 auto;padding:20px 28px">
+    <p style="background:#fdecea;color:#d92d20;border-radius:10px;padding:12px 16px;font-size:13px">
+      本原型需要 JavaScript 渲染交互演示。请启用 JavaScript 后刷新，或查看 docs/design-spec.md 中的静态设计规范。
+    </p>
+  </div>
+</noscript>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="sr-only" id="mbLive" role="status" aria-live="polite"></div>
+
+<!-- build:js src/js/config.js -->
+<script src="src/js/config.js"></script>
+<!-- endbuild -->
+<!-- build:js src/js/app.js -->
+<script src="src/js/app.js"></script>
+<!-- endbuild -->
+</body>
+</html>

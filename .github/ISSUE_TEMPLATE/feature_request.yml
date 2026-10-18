@@ -1,0 +1,36 @@
+name: 功能建议
+description: 新的状态场景、分区规则、交互或工程能力
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 建议类型
+      options:
+        - 新的状态场景（states）
+        - 分区 / 优先级规则调整
+        - 交互行为改进
+        - 视觉令牌调整
+        - 工程能力（构建 / 测试 / CI）
+        - 文档与翻译
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 场景与动机
+      description: 什么场景下需要？当前方案缺什么？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 期望的行为、涉及哪些配置项或样式令牌
+    validations:
+      required: true
+  - type: textarea
+    id: refs
+    attributes:
+      label: 参考
+      description: 同类产品（Ice / Thaw / Bartender…）或 Apple HIG 中的相关做法

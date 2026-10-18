@@ -1,0 +1,60 @@
+name: Bug 报告
+description: 交互、渲染或构建异常
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请确认 `npm test` 通过，并已在最新版本复现。
+  - type: dropdown
+    id: area
+    attributes:
+      label: 问题区域
+      options:
+        - 03 主交互演示
+        - 04 状态矩阵
+        - 05 多屏幕
+        - 外观 / 密度切换
+        - 构建脚本 / 测试
+        - 文档
+    validations:
+      required: true
+  - type: dropdown
+    id: appearance
+    attributes:
+      label: 外观
+      options:
+        - 深色
+        - 浅色
+        - 跟随系统
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象描述
+      description: 发生了什么？期望发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 index.html
+        2. 点击 …
+        3. 出现 …
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 浏览器与系统
+      placeholder: 如 Safari 26 / macOS 15
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: 补充信息
+      description: 截图、控制台错误、相关配置片段
