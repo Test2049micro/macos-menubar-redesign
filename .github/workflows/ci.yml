@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
 
       - name: Smoke test (13 assertions)
         run: node scripts/smoke.js
