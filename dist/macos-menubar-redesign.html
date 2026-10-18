@@ -309,6 +309,20 @@ h1 { font-size: 27px; font-weight: 750; letter-spacing: -.01em; margin-bottom: 1
 .dot--running { animation: breathe 1.8s ease-in-out infinite; will-change: opacity; }
 @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 
+/* 场景增强指示：会议 / 录屏 / 勿扰 / 外接屏 */
+.dot--meeting { background: var(--badge-bg); }
+.dot--recording { background: var(--badge-bg); animation: breathe 1.8s ease-in-out infinite; will-change: opacity; }
+.menubar__ind { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; }
+.menubar__ind--meeting { color: var(--badge-bg); }
+.menubar__ind--recording { color: var(--badge-bg); }
+.menubar__item--dnd { color: #FF9F0A; }
+.menubar__pill {
+  display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; line-height: 1.5;
+  background: rgba(255, 159, 10, .16); color: #FF9F0A; border: 1px solid rgba(255, 159, 10, .4);
+}
+.menubar--mini .menubar__pill { font-size: 9.5px; padding: 1px 5px; }
+
 /* 幽灵元素（已移除项） */
 .menubar__item--ghost { opacity: .4; }
 .menubar__item--ghost .batt-txt { text-decoration: line-through; }
@@ -506,7 +520,7 @@ body.show-anno .anno { display: inline-flex; }
 
 /* ================= 动效与无障碍降级 ================= */
 @media (prefers-reduced-motion: reduce) {
-  .dot--running { animation: none; }
+  .dot--running, .dot--recording { animation: none; }
   *, *::before, *::after { transition-duration: .01ms !important; }
 }
 
@@ -648,6 +662,10 @@ body.show-anno .anno { display: inline-flex; }
     <div class="seg" role="group" aria-label="密度">
       <button type="button" class="seg__btn seg__btn--active" data-density="regular" aria-pressed="true">宽松 28pt</button>
       <button type="button" class="seg__btn" data-density="compact" aria-pressed="false">紧凑 24pt</button>
+    </div>
+    <div class="seg" role="group" aria-label="语言">
+      <button type="button" class="seg__btn seg__btn--active" data-lang="zh-CN" aria-pressed="true">中文</button>
+      <button type="button" class="seg__btn" data-lang="en" aria-pressed="false">EN</button>
     </div>
     <button type="button" class="gbtn" id="annoBtn" aria-pressed="false">显示标注</button>
     <button type="button" class="gbtn" id="exportBtn">导出配置</button>
@@ -931,17 +949,43 @@ body.show-anno .anno { display: inline-flex; }
       discharging: '电池供电',
       low: '电量低',
       focus: '专注模式已开启',
-      connected: '已连接',
-      reconnecting: '重连中',
-      lost: '已断开',
+      dnd: '勿扰模式已开启',
       imeActive: '中文输入',
       imeIdle: '英文输入',
+      /* 托盘区固定项 */
+      searchLabel: '聚焦搜索',
+      ccLabel: '控制中心',
+      imeEnLabel: 'ABC',
+      /* 场景增强 */
+      meeting: '会议中',
+      recording: '录屏中',
+      display: '外接屏接入',
+      /* 通信区未读后缀（前接「 · N」） */
+      unreadSuffix: ' 条未读',
+      /* 计数与标注按钮（i18n 纪律：勿硬编码） */
+      itemUnit: ' 项',
+      countSep: '，共 ',
+      annoShow: '显示标注',
+      annoHide: '隐藏标注',
+      configMissing: '[MBR] 配置缺失，请检查 src/js/config.js',
+      /* Dock 应用名（按语言本地化） */
+      dockNames: ['Finder', 'Safari', '微信', '终端', 'VS Code', 'Zotero'],
+      /* 溢出管理 */
       overflowTitle: '已折叠的工具',
       overflowEmpty: '所有工具均已在菜单栏显示',
       overflowFoot: '在「系统设置 › 菜单栏」中可统一管理；工具区置顶上限 3 个。',
       pin: '置顶到工具区',
       unpin: '收入溢出区',
       limitHint: '工具区最多置顶 3 个，请先将一个图标收入溢出区',
+      /* 操作回执 */
+      pinnedMsg: '已置顶到工具区',
+      unpinnedMsg: '已收入溢出区',
+      resetMsg: '演示已重置',
+      copiedMsg: '配置 JSON 已复制到剪贴板',
+      copyFailMsg: '复制失败，JSON 已输出到控制台',
+      /* 远程连接质量 */
+      connTip: '远程连接质量',
+      connQuality: { good: '良好', warn: '一般', bad: '较差' },
       clock: function (d) {
         var wd = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()];
         function p(n) { return (n < 10 ? '0' : '') + n; }
@@ -957,17 +1001,35 @@ body.show-anno .anno { display: inline-flex; }
       discharging: 'On battery',
       low: 'Low battery',
       focus: 'Focus on',
-      connected: 'Connected',
-      reconnecting: 'Reconnecting',
-      lost: 'Disconnected',
+      dnd: 'Do Not Disturb on',
       imeActive: 'Chinese input',
       imeIdle: 'English input',
+      searchLabel: 'Spotlight',
+      ccLabel: 'Control Center',
+      imeEnLabel: 'ABC',
+      meeting: 'In meeting',
+      recording: 'Recording',
+      display: 'Display attached',
+      unreadSuffix: ' unread',
+      itemUnit: ' items',
+      countSep: ', ',
+      annoShow: 'Show annotations',
+      annoHide: 'Hide annotations',
+      configMissing: '[MBR] config missing, check src/js/config.js',
+      dockNames: ['Finder', 'Safari', 'WeChat', 'Terminal', 'VS Code', 'Zotero'],
       overflowTitle: 'Collapsed items',
       overflowEmpty: 'All items are visible',
       overflowFoot: 'Manage everything in System Settings > Menu Bar. Tool zone pins up to 3.',
       pin: 'Pin to tool zone',
       unpin: 'Collapse',
       limitHint: 'Tool zone holds 3 pins. Collapse one first.',
+      pinnedMsg: 'Pinned to tool zone',
+      unpinnedMsg: 'Collapsed to overflow',
+      resetMsg: 'Demo reset',
+      copiedMsg: 'Config JSON copied to clipboard',
+      copyFailMsg: 'Copy failed; JSON printed to console',
+      connTip: 'Remote connection quality',
+      connQuality: { good: 'good', warn: 'fair', bad: 'poor' },
       clock: function (d) {
         var wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
         function p(n) { return (n < 10 ? '0' : '') + n; }
@@ -982,7 +1044,7 @@ body.show-anno .anno { display: inline-flex; }
 
     meta: {
       name: '问 · macOS 菜单栏重设计',
-      version: '2.0.0',
+      version: '2.1.0',
       license: 'MIT',
       locale: ZH
     },
@@ -1059,12 +1121,14 @@ body.show-anno .anno { display: inline-flex; }
      *   comm  未读数，0 表示隐藏通信分区
      *   tools 工具 id 数组，后缀 '*' 表示运行中
      *   chip  溢出芯片数字
-     *   tray  { cc, focus }
+     *   tray  { cc, focus, dnd, meeting, recording } 布尔叠加态
+     *   display true 表示外接触发（托盘区短暂提示）
      */
     stateGroups: [
       { title: '一天中的不同时候', sub: '时钟格式 · 专注模式 · 日期翻转', items: ['morning', 'afternoon', 'evening', 'night'] },
       { title: '任务与通知状态', sub: '运行圆点 · 未读徽标 · 自动置顶', items: ['idle', 'concurrent', 'surge'] },
-      { title: '系统与容量状态', sub: '电池三态 · 应用增长', items: ['charging', 'discharging', 'low', 'growth'] }
+      { title: '系统与容量状态', sub: '电池三态 · 应用增长', items: ['charging', 'discharging', 'low', 'growth'] },
+      { title: '场景增强', sub: '会议 · 录屏 · 多屏 · 勿扰', items: ['meeting', 'recording', 'display', 'dnd-low'] }
     ],
     states: [
       {
@@ -1143,6 +1207,34 @@ body.show-anno .anno { display: inline-flex; }
         sys: { level: 0.47, color: '', bolt: false, tip: '电池 47%' },
         ime: 'pin', comm: 3, tools: ['copilot', 'gpt', 'claude'], chip: 12,
         tray: { cc: true, focus: false }, clock: '10月16日 周五 20:26'
+      },
+      {
+        id: 'meeting', title: '会议中 · 周三 10:00',
+        desc: '日历进入会议：托盘区出现红色会议圆点；工具按 P1 自动让出静默位，不干扰会议上下文。',
+        sys: { level: 0.72, color: 'green', bolt: true, tip: '电池 72% · 充电中' },
+        ime: 'pin', comm: 0, tools: ['copilot', 'gpt', 'claude'], chip: 7,
+        tray: { cc: true, focus: false, meeting: true }, clock: '10月18日 周三 10:00'
+      },
+      {
+        id: 'recording', title: '录屏中 · 周三 11:20',
+        desc: '屏幕录制进行：托盘区红色呼吸圆点（与系统录像指示同源语义）；其余分区维持常态。',
+        sys: { level: 0.68, color: 'green', bolt: true, tip: '电池 68% · 充电中' },
+        ime: 'pin', comm: 3, tools: ['copilot', 'gpt', 'claude'], chip: 7,
+        tray: { cc: true, focus: false, recording: true }, clock: '10月18日 周三 11:20'
+      },
+      {
+        id: 'display', title: '外接屏接入 · 周三 14:05',
+        desc: '新显示器接入：托盘区短暂显示「外接屏接入」提示徽标，确认后自动消退；多屏布局无缝扩展。',
+        sys: { level: 0.8, color: 'green', bolt: true, tip: '电池 80% · 充电中' },
+        ime: 'pin', comm: 3, tools: ['copilot', 'gpt', 'claude'], chip: 7,
+        tray: { cc: true, focus: false }, display: true, clock: '10月18日 周三 14:05'
+      },
+      {
+        id: 'dnd-low', title: '勿扰 + 低电量 · 周三 22:40',
+        desc: '勿扰开启叠加低电量：月亮与红电池共存；未读与运行圆点暂时收敛，状态栏进入极简模式。',
+        sys: { level: 0.09, color: 'red', bolt: false, tip: '电量低 · 9%', showText: true },
+        ime: 'abc', comm: 0, tools: ['copilot'], chip: 9,
+        tray: { cc: true, focus: true, dnd: true }, clock: '10月18日 周三 22:40'
       }
     ],
 
@@ -1179,6 +1271,7 @@ body.show-anno .anno { display: inline-flex; }
           role: 'portrait', label: '竖屏副屏', tag: '顺序收缩', mode: 'portrait',
           portraitItems: ['battery', 'clock', 'cc'],
           portraitClock: '周六 02:15',
+          portraitBattery: 0.42,
           cap: '<b>竖屏：</b>宽度不足时按「系统 → 时钟 → 通信 → 工具」顺序收缩，始终保留系统与时钟。'
         },
         {
@@ -1269,7 +1362,7 @@ body.show-anno .anno { display: inline-flex; }
     }
     if (mode === 'abc') {
       return '<div class="menubar__zone">' +
-        '<span class="menubar__item menubar__ime menubar__ime--dim"' + tipAttr(T.imeIdle) + '><span class="ime-dot ime-dot--off" aria-hidden="true"></span>ABC</span></div>';
+        '<span class="menubar__item menubar__ime menubar__ime--dim"' + tipAttr(T.imeIdle) + '><span class="ime-dot ime-dot--off" aria-hidden="true"></span>' + esc(T.imeEnLabel) + '</span></div>';
     }
     return '';
   }
@@ -1277,7 +1370,7 @@ body.show-anno .anno { display: inline-flex; }
     if (!unread) { return ''; }
     var c = cfg.comms[0];
     return '<div class="menubar__zone">' +
-      item(icon(c.icon) + '<span class="badge">' + fmtBadge(unread) + '</span>', c.name + ' · ' + unread + ' 条未读') +
+      item(icon(c.icon) + '<span class="badge">' + fmtBadge(unread) + '</span>', c.name + ' · ' + unread + T.unreadSuffix) +
       '</div>';
   }
   function toolItemHTML(t, interactive) {
@@ -1296,11 +1389,22 @@ body.show-anno .anno { display: inline-flex; }
     }
     return item(inner, def.name + (running ? ' · ' + T.running : ''));
   }
-  function trayZoneHTML(clock, tray) {
+  function trayZoneHTML(clock, tray, display) {
+    tray = tray || {};
     var h = '<div class="menubar__zone">';
-    h += item(icon('i-search'), '聚焦搜索');
-    h += item(icon('i-cc'), '控制中心');
-    if (tray && tray.focus) { h += item(icon('i-moon'), T.focus); }
+    h += item(icon('i-search'), T.searchLabel);
+    h += item(icon('i-cc'), T.ccLabel);
+    if (tray.dnd) { h += item(icon('i-moon'), T.dnd, 'menubar__item--dnd'); }
+    else if (tray.focus) { h += item(icon('i-moon'), T.focus); }
+    if (tray.meeting) {
+      h += '<span class="menubar__item menubar__ind menubar__ind--meeting"' + tipAttr(T.meeting) + '><span class="dot dot--meeting" aria-hidden="true"></span>' + esc(T.meeting) + '</span>';
+    }
+    if (tray.recording) {
+      h += '<span class="menubar__item menubar__ind menubar__ind--recording"' + tipAttr(T.recording) + '><span class="dot dot--recording" aria-hidden="true"></span>' + esc(T.recording) + '</span>';
+    }
+    if (display) {
+      h += '<span class="menubar__item menubar__pill"' + tipAttr(T.display) + '>' + esc(T.display) + '</span>';
+    }
     h += '<span class="menubar__item menubar__clock">' + esc(clock) + '</span>';
     return h + '</div>';
   }
@@ -1319,7 +1423,7 @@ body.show-anno .anno { display: inline-flex; }
     if (st.chip) {
       zones.push('<div class="ov"><span class="ov__chip">+' + st.chip + '</span></div>');
     }
-    zones.push(trayZoneHTML(st.clock, st.tray));
+    zones.push(trayZoneHTML(st.clock, st.tray, st.display));
     return '<div class="menubar menubar--mini' + (opts.slim ? ' menubar--slim' : '') + '">' +
       (opts.appMenus
         ? '<div class="menubar__left">' + opts.appMenus.map(function (m, i) {
@@ -1374,7 +1478,7 @@ body.show-anno .anno { display: inline-flex; }
     /* 通信区 */
     var c = cfg.comms[0];
     zones.push('<div class="menubar__zone">' +
-      item(icon(c.icon) + '<span class="badge">' + fmtBadge(c.unread) + '</span>', c.name + ' · ' + c.unread + ' 条未读') + '</div>');
+      item(icon(c.icon) + '<span class="badge">' + fmtBadge(c.unread) + '</span>', c.name + ' · ' + c.unread + T.unreadSuffix) + '</div>');
     /* 工具区（动态） */
     zones.push('<div class="menubar__zone" id="toolsZone"></div>');
     /* 溢出芯片 + 管理面板 */
@@ -1390,8 +1494,8 @@ body.show-anno .anno { display: inline-flex; }
     );
     /* 托盘区 */
     zones.push('<div class="menubar__zone">' +
-      item(icon('i-search'), '聚焦搜索') +
-      item(icon('i-cc'), '控制中心') +
+      item(icon('i-search'), T.searchLabel) +
+      item(icon('i-cc'), T.ccLabel) +
       '<span class="menubar__item menubar__clock"><span id="clockLive">' + esc(clockNow()) + '</span>' + anno(cfg.anno.clock) + '</span>' +
       '</div>');
     return '<div class="menubar">' + left + '<div class="menubar__right">' + zones.join(sep()) + '</div></div>';
@@ -1430,9 +1534,9 @@ body.show-anno .anno { display: inline-flex; }
     var dock = s.dock
       ? '<div class="dock">' + ['i-dock-finder', 'i-dock-safari', 'i-wechat', 'i-dock-terminal', 'i-dock-code', 'i-letter-z']
           .map(function (ic, i) {
-            var names = ['Finder', 'Safari', '微信', '终端', 'VS Code', 'Zotero'];
+            var names = T.dockNames;
             var dks = ['dk--finder', 'dk--safari', 'dk--wechat', 'dk--terminal', 'dk--code', 'dk--zotero'];
-            return '<span class="dk ' + dks[i] + '" data-name="' + names[i] + '">' + icon(ic) + '</span>';
+            return '<span class="dk ' + dks[i] + '" data-name="' + esc(names[i]) + '">' + icon(ic) + '</span>';
           }).join('') + '</div>'
       : '';
     return '<div class="screen screen--tall"><div class="screen__wall"></div>' + bar + win + dock + '</div>';
@@ -1443,9 +1547,10 @@ body.show-anno .anno { display: inline-flex; }
       body = '<div class="screen__hint"><span class="fs-chip">' + esc(s.hint[0]) + '</span><small>' + esc(s.hint[1]) + '</small></div>';
     } else if (s.mode === 'portrait') {
       var zones = [];
-      zones.push('<div class="menubar__zone">' + item(battHTML(0.63, '', '63%'), '电池 63%') + '</div>');
+      var pb = (typeof s.portraitBattery === 'number') ? s.portraitBattery : 0.63;
+      zones.push('<div class="menubar__zone">' + item(battHTML(pb, '', Math.round(pb * 100) + '%'), T.discharging + ' ' + Math.round(pb * 100) + '%') + '</div>');
       zones.push('<div class="menubar__zone"><span class="menubar__item menubar__clock">' + esc(s.portraitClock) + '</span></div>');
-      zones.push('<div class="menubar__zone">' + item(icon('i-cc'), '控制中心') + '</div>');
+      zones.push('<div class="menubar__zone">' + item(icon('i-cc'), T.ccLabel) + '</div>');
       body = '<div class="menubar menubar--mini menubar--slim"><div class="menubar__left"><span class="menubar__item menubar__apple">' + icon('i-apple') + '</span></div>' +
         '<div class="menubar__right">' + zones.join(sep()) + '</div></div>';
     } else if (s.mode === 'remote') {
@@ -1455,8 +1560,8 @@ body.show-anno .anno { display: inline-flex; }
         item(icon('i-wifi'), cfg.system.wifi.tip) + item(icon('i-sound'), cfg.system.sound.tip) +
         item(battHTML(cfg.system.battery.level, 'green'), cfg.system.battery.tip) + '</div>');
       zones2.push('<div class="menubar__zone"><span class="menubar__item menubar__conn' + (q === 'warn' ? ' menubar__conn--warn' : '') + '"' +
-        tipAttr('UU远程 · 连接质量' + (q === 'good' ? '良好' : q === 'warn' ? '一般' : '差')) + '><span class="conn-dot" aria-hidden="true"></span>' + esc(s.conn.label) + '</span></div>');
-      zones2.push('<div class="menubar__zone">' + item(icon('i-cc'), '控制中心') +
+        tipAttr(T.connTip + ' · ' + T.connQuality[q]) + '><span class="conn-dot" aria-hidden="true"></span>' + esc(s.conn.label) + '</span></div>');
+      zones2.push('<div class="menubar__zone">' + item(icon('i-cc'), T.ccLabel) +
         '<span class="menubar__item menubar__clock">' + esc(clockNow()) + '</span></div>');
       body = '<div class="menubar menubar--mini menubar--slim">' +
         '<div class="menubar__left"><span class="menubar__item menubar__apple">' + icon('i-apple') + '</span></div>' +
@@ -1497,7 +1602,7 @@ body.show-anno .anno { display: inline-flex; }
   function hiddenTools() { return cfg.tools.filter(function (t) { return !state.pinned[t.id]; }); }
 
   /* ================= 交互 ================= */
-  var liveTimer = null, toastTimer = null, hintTimer = null;
+  var liveTimer = null, toastTimer = null, hintTimer = null, clockStarted = false;
 
   function announce(msg) {
     var live = el('mbLive');
@@ -1529,7 +1634,7 @@ body.show-anno .anno { display: inline-flex; }
     var chip = el('overflowChip');
     if (chip) {
       chip.textContent = '+' + hidden.length;
-      chip.setAttribute('aria-label', T.overflowTitle + '，共 ' + hidden.length + ' 项');
+      chip.setAttribute('aria-label', T.overflowTitle + T.countSep + hidden.length + T.itemUnit);
     }
     var wrap = el('overflowWrap');
     if (wrap) { wrap.hidden = hidden.length === 0; }
@@ -1544,7 +1649,7 @@ body.show-anno .anno { display: inline-flex; }
         : '<div class="pop__empty">' + esc(T.overflowEmpty) + '</div>';
     }
     var cnt = el('popCount');
-    if (cnt) { cnt.textContent = hidden.length + ' 项'; }
+    if (cnt) { cnt.textContent = hidden.length + T.itemUnit; }
   }
 
   function openPop() {
@@ -1581,7 +1686,7 @@ body.show-anno .anno { display: inline-flex; }
     }
     state.pinned[id] = true;
     renderTools();
-    announce(t.name + ' 已置顶到工具区');
+    announce(t.name + ' · ' + T.pinnedMsg);
   }
   function unpinTool(id) {
     var t = null;
@@ -1589,7 +1694,7 @@ body.show-anno .anno { display: inline-flex; }
     if (!t) { return; }
     state.pinned[id] = false;
     renderTools();
-    announce(t.name + ' 已' + T.unpin);
+    announce(t.name + ' · ' + T.unpinnedMsg);
   }
 
   function bindMainMock() {
@@ -1599,22 +1704,6 @@ body.show-anno .anno { display: inline-flex; }
     chip.addEventListener('click', function (e) {
       e.stopPropagation();
       state.popOpen ? closePop(true) : openPop();
-    });
-    document.addEventListener('click', function (e) {
-      if (state.popOpen && pop && !pop.contains(e.target) && e.target !== chip && !chip.contains(e.target)) {
-        closePop(false);
-      }
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.popOpen) { closePop(true); }
-      /* 弹层内焦点圈定 */
-      if (e.key === 'Tab' && state.popOpen && pop) {
-        var f = pop.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
-        if (!f.length) { return; }
-        var first = f[0], last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
     });
     if (list) {
       list.addEventListener('click', function (e) {
@@ -1634,6 +1723,27 @@ body.show-anno .anno { display: inline-flex; }
         }
       });
     }
+  }
+
+  /* 文档级监听（仅绑定一次，重渲染不重复） */
+  function bindGlobalOnce() {
+    var pop = el('overflowPop'), chip = el('overflowChip');
+    document.addEventListener('click', function (e) {
+      if (state.popOpen && pop && !pop.contains(e.target) && e.target !== chip && !chip.contains(e.target)) {
+        closePop(false);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.popOpen) { closePop(true); }
+      /* 弹层内焦点圈定 */
+      if (e.key === 'Tab' && state.popOpen && pop) {
+        var f = pop.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+        if (!f.length) { return; }
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
   }
 
   /* ================= 控制条 ================= */
@@ -1661,13 +1771,13 @@ body.show-anno .anno { display: inline-flex; }
     document.body.classList.toggle('show-anno', state.annotations);
     var btn = el('annoBtn');
     if (btn) {
-      btn.textContent = state.annotations ? '隐藏标注' : '显示标注';
+      btn.textContent = state.annotations ? T.annoHide : T.annoShow;
       btn.setAttribute('aria-pressed', String(state.annotations));
     }
   }
   function exportConfig() {
     var json = JSON.stringify(cfg, null, 2);
-    function ok() { showToast('配置 JSON 已复制到剪贴板'); }
+    function ok() { showToast(T.copiedMsg); }
     function fallback() {
       var ta = document.createElement('textarea');
       ta.value = json;
@@ -1677,7 +1787,7 @@ body.show-anno .anno { display: inline-flex; }
       document.body.appendChild(ta);
       ta.select();
       try { document.execCommand('copy'); ok(); }
-      catch (err) { showToast('复制失败，JSON 已输出到控制台'); if (root.console) { console.log(json); } }
+      catch (err) { showToast(T.copyFailMsg); if (root.console) { console.log(json); } }
       document.body.removeChild(ta);
     }
     if (root.navigator && root.navigator.clipboard && root.navigator.clipboard.writeText) {
@@ -1691,6 +1801,12 @@ body.show-anno .anno { display: inline-flex; }
       themeBtns[i].addEventListener('click', function () {
         state.theme = this.getAttribute('data-theme');
         applyTheme();
+      });
+    }
+    var langBtns = document.querySelectorAll('[data-lang]');
+    for (var l = 0; l < langBtns.length; l++) {
+      langBtns[l].addEventListener('click', function () {
+        setLocale(this.getAttribute('data-lang'));
       });
     }
     var densBtns = document.querySelectorAll('[data-density]');
@@ -1715,8 +1831,8 @@ body.show-anno .anno { display: inline-flex; }
         cfg.tools.forEach(function (t) { state.pinned[t.id] = !!t.pinned; });
         closePop(false);
         renderTools();
-        showToast('演示已重置');
-        announce('演示已重置');
+        showToast(T.resetMsg);
+        announce(T.resetMsg);
       });
     }
     if (mq && mq.addEventListener) {
@@ -1725,25 +1841,42 @@ body.show-anno .anno { display: inline-flex; }
   }
 
   /* ================= 挂载 ================= */
-  /* 注意：#legacyMock / #mainMock 容器内已含 .screen__wall，
-     故使用 insertAdjacentHTML 追加，避免覆盖墙体。 */
-  function mount() {
+  /* 每次重渲染都重建墙体 + 内容，保证墙体不被覆盖且可被语言切换复用。 */
+  function wallHTML() { return '<div class="screen__wall"></div>'; }
+  function renderLegacy() {
     var legacy = el('legacyMock');
-    if (legacy) { legacy.insertAdjacentHTML('beforeend', buildLegacyBar() + dockHTML()); }
+    if (legacy) { legacy.innerHTML = wallHTML() + buildLegacyBar() + dockHTML(); }
+  }
+  function renderMain() {
     var main = el('mainMock');
-    if (main) { main.insertAdjacentHTML('beforeend', buildMainBar() + windowHTML(cfg.screens.stage[0].window) + dockHTML()); }
+    if (main) { main.innerHTML = wallHTML() + buildMainBar() + windowHTML(cfg.screens.stage[0].window) + dockHTML(); }
+  }
+  function renderMatrix() {
     var matrix = el('matrix');
     if (matrix) { matrix.innerHTML = buildMatrix(); }
+  }
+  function renderScreens() {
     var screens = el('multiscreen');
     if (screens) { screens.innerHTML = buildScreens(); }
+  }
+  function renderAll() {
+    renderLegacy();
+    renderMain();
+    renderMatrix();
+    renderScreens();
     renderTools();
+    applyTheme();
+    applyDensity();
+    applyAnnotations();
+    bindMainMock();
+    startClock();
   }
   function dockHTML() {
     return '<div class="dock">' + ['i-dock-finder', 'i-dock-safari', 'i-wechat', 'i-dock-terminal', 'i-dock-code', 'i-letter-z']
       .map(function (ic, i) {
-        var names = ['Finder', 'Safari', '微信', '终端', 'VS Code', 'Zotero'];
+        var names = T.dockNames;
         var dks = ['dk--finder', 'dk--safari', 'dk--wechat', 'dk--terminal', 'dk--code', 'dk--zotero'];
-        return '<span class="dk ' + dks[i] + '" data-name="' + names[i] + '">' + icon(ic) + '</span>';
+        return '<span class="dk ' + dks[i] + '" data-name="' + esc(names[i]) + '">' + icon(ic) + '</span>';
       }).join('') + '</div>';
   }
   function windowHTML(w) {
@@ -1753,29 +1886,47 @@ body.show-anno .anno { display: inline-flex; }
 
   /* 实时时钟（15s 粒度，跨天自动翻转） */
   function startClock() {
+    if (clockStarted) { return; }
     var node = el('clockLive');
     if (!node) { return; }
+    clockStarted = true;
     function tick() { node.textContent = clockNow(); }
     tick();
     setInterval(tick, 15000);
   }
 
+  /* ================= 语言切换 ================= */
+  function setLocale(locale) {
+    if (!MBR.i18n[locale]) { return; }
+    cfg.meta.locale = locale;
+    T = MBR.i18n[locale] || {};
+    if (root.document) { root.document.documentElement.lang = locale; }
+    renderAll();
+    var langBtns = document.querySelectorAll('[data-lang]');
+    for (var i = 0; i < langBtns.length; i++) {
+      var on = langBtns[i].getAttribute('data-lang') === locale;
+      langBtns[i].classList.toggle('seg__btn--active', on);
+      langBtns[i].setAttribute('aria-pressed', String(on));
+    }
+  }
+
   /* ================= 初始化 ================= */
   function init() {
-    if (!cfg.tools) { if (root.console) { console.error('[MBR] config 缺失，请检查 src/js/config.js'); } return; }
-    mount();
+    if (!cfg.tools) { if (root.console) { console.error(T.configMissing); } return; }
+    renderAll();
+    bindGlobalOnce();
     bindControls();
-    bindMainMock();
-    applyTheme();
-    applyDensity();
-    applyAnnotations();
-    startClock();
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', function () { if (state.theme === 'auto') { applyTheme(); } });
+    }
   }
 
   var app = {
     init: init,
     state: state,
     config: cfg,
+    setLocale: setLocale,
+    renderAll: renderAll,
     /* 纯函数导出（供测试与二次开发） */
     builders: {
       esc: esc, fmtBadge: fmtBadge, clockNow: clockNow,

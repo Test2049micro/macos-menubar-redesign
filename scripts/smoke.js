@@ -24,14 +24,14 @@ function ok(name, fn) {
 
 console.log('\n[1] 配置完整性');
 ok('meta 与阈值', () => {
-  assert.strictEqual(cfg.meta.version, '2.0.0');
+  assert.strictEqual(cfg.meta.version, '2.1.0');
   assert.strictEqual(cfg.thresholds.maxPinnedTools, 3);
   assert.strictEqual(cfg.thresholds.badgeMax, 99);
 });
 ok('数据规模', () => {
   assert.strictEqual(cfg.legacy.items.length, 20, 'legacy items');
   assert.strictEqual(cfg.tools.length, 10, 'tools');
-  assert.strictEqual(cfg.states.length, 11, 'states');
+  assert.strictEqual(cfg.states.length, 15, 'states');
   assert.strictEqual(cfg.comms.length, 1);
   const total = cfg.stateGroups.reduce((n, g) => n + g.items.length, 0);
   assert.strictEqual(total, cfg.states.length, 'stateGroups 覆盖全部状态');
@@ -63,10 +63,10 @@ ok('主菜单栏包含交互骨架', () => {
   ['overflowChip', 'overflowPop', 'toolsZone', 'popList', 'clockLive', 'menubar__item--ghost']
     .forEach(id => assert.ok(html.includes(id), id));
 });
-ok('状态矩阵渲染 11 张卡片 / 3 组', () => {
+ok('状态矩阵渲染 15 张卡片 / 4 组', () => {
   const html = B.buildMatrix();
-  assert.strictEqual((html.match(/class="mini"/g) || []).length, 11);
-  assert.strictEqual((html.match(/class="mx-group"/g) || []).length, 3);
+  assert.strictEqual((html.match(/class="mini"/g) || []).length, 15);
+  assert.strictEqual((html.match(/class="mx-group"/g) || []).length, 4);
 });
 ok('多屏幕渲染 5 个角色', () => {
   const html = B.buildScreens();

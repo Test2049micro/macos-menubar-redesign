@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Smoke test (13 assertions)
+        run: node scripts/smoke.js
+
+      - name: Audit (480+ assertions)
+        run: node scripts/audit.js
+
+      - name: Build dist
+        run: node scripts/build.mjs
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/macos-menubar-redesign.html
+          if-no-files-found: error

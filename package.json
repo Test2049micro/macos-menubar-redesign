@@ -1,6 +1,6 @@
 {
   "name": "macos-menubar-redesign",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "问 · macOS 菜单栏（状态栏）重设计 — 设计规范与可交互原型（配置驱动、零依赖、可离线）",
   "keywords": [
     "macos",
@@ -22,7 +22,9 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node scripts/smoke.js",
+    "smoke": "node scripts/smoke.js",
+    "audit": "node scripts/audit.js",
+    "test": "node scripts/smoke.js && node scripts/audit.js",
     "dev": "node scripts/build.mjs"
   },
   "engines": {

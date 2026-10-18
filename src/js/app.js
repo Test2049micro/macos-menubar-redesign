@@ -67,7 +67,7 @@
     }
     if (mode === 'abc') {
       return '<div class="menubar__zone">' +
-        '<span class="menubar__item menubar__ime menubar__ime--dim"' + tipAttr(T.imeIdle) + '><span class="ime-dot ime-dot--off" aria-hidden="true"></span>ABC</span></div>';
+        '<span class="menubar__item menubar__ime menubar__ime--dim"' + tipAttr(T.imeIdle) + '><span class="ime-dot ime-dot--off" aria-hidden="true"></span>' + esc(T.imeEnLabel) + '</span></div>';
     }
     return '';
   }
@@ -75,7 +75,7 @@
     if (!unread) { return ''; }
     var c = cfg.comms[0];
     return '<div class="menubar__zone">' +
-      item(icon(c.icon) + '<span class="badge">' + fmtBadge(unread) + '</span>', c.name + ' · ' + unread + ' 条未读') +
+      item(icon(c.icon) + '<span class="badge">' + fmtBadge(unread) + '</span>', c.name + ' · ' + unread + T.unreadSuffix) +
       '</div>';
   }
   function toolItemHTML(t, interactive) {
@@ -94,11 +94,22 @@
     }
     return item(inner, def.name + (running ? ' · ' + T.running : ''));
   }
-  function trayZoneHTML(clock, tray) {
+  function trayZoneHTML(clock, tray, display) {
+    tray = tray || {};
     var h = '<div class="menubar__zone">';
-    h += item(icon('i-search'), '聚焦搜索');
-    h += item(icon('i-cc'), '控制中心');
-    if (tray && tray.focus) { h += item(icon('i-moon'), T.focus); }
+    h += item(icon('i-search'), T.searchLabel);
+    h += item(icon('i-cc'), T.ccLabel);
+    if (tray.dnd) { h += item(icon('i-moon'), T.dnd, 'menubar__item--dnd'); }
+    else if (tray.focus) { h += item(icon('i-moon'), T.focus); }
+    if (tray.meeting) {
+      h += '<span class="menubar__item menubar__ind menubar__ind--meeting"' + tipAttr(T.meeting) + '><span class="dot dot--meeting" aria-hidden="true"></span>' + esc(T.meeting) + '</span>';
+    }
+    if (tray.recording) {
+      h += '<span class="menubar__item menubar__ind menubar__ind--recording"' + tipAttr(T.recording) + '><span class="dot dot--recording" aria-hidden="true"></span>' + esc(T.recording) + '</span>';
+    }
+    if (display) {
+      h += '<span class="menubar__item menubar__pill"' + tipAttr(T.display) + '>' + esc(T.display) + '</span>';
+    }
     h += '<span class="menubar__item menubar__clock">' + esc(clock) + '</span>';
     return h + '</div>';
   }
@@ -117,7 +128,7 @@
     if (st.chip) {
       zones.push('<div class="ov"><span class="ov__chip">+' + st.chip + '</span></div>');
     }
-    zones.push(trayZoneHTML(st.clock, st.tray));
+    zones.push(trayZoneHTML(st.clock, st.tray, st.display));
     return '<div class="menubar menubar--mini' + (opts.slim ? ' menubar--slim' : '') + '">' +
       (opts.appMenus
         ? '<div class="menubar__left">' + opts.appMenus.map(function (m, i) {
@@ -172,7 +183,7 @@
     /* 通信区 */
     var c = cfg.comms[0];
     zones.push('<div class="menubar__zone">' +
-      item(icon(c.icon) + '<span class="badge">' + fmtBadge(c.unread) + '</span>', c.name + ' · ' + c.unread + ' 条未读') + '</div>');
+      item(icon(c.icon) + '<span class="badge">' + fmtBadge(c.unread) + '</span>', c.name + ' · ' + c.unread + T.unreadSuffix) + '</div>');
     /* 工具区（动态） */
     zones.push('<div class="menubar__zone" id="toolsZone"></div>');
     /* 溢出芯片 + 管理面板 */
@@ -188,8 +199,8 @@
     );
     /* 托盘区 */
     zones.push('<div class="menubar__zone">' +
-      item(icon('i-search'), '聚焦搜索') +
-      item(icon('i-cc'), '控制中心') +
+      item(icon('i-search'), T.searchLabel) +
+      item(icon('i-cc'), T.ccLabel) +
       '<span class="menubar__item menubar__clock"><span id="clockLive">' + esc(clockNow()) + '</span>' + anno(cfg.anno.clock) + '</span>' +
       '</div>');
     return '<div class="menubar">' + left + '<div class="menubar__right">' + zones.join(sep()) + '</div></div>';
@@ -228,9 +239,9 @@
     var dock = s.dock
       ? '<div class="dock">' + ['i-dock-finder', 'i-dock-safari', 'i-wechat', 'i-dock-terminal', 'i-dock-code', 'i-letter-z']
           .map(function (ic, i) {
-            var names = ['Finder', 'Safari', '微信', '终端', 'VS Code', 'Zotero'];
+            var names = T.dockNames;
             var dks = ['dk--finder', 'dk--safari', 'dk--wechat', 'dk--terminal', 'dk--code', 'dk--zotero'];
-            return '<span class="dk ' + dks[i] + '" data-name="' + names[i] + '">' + icon(ic) + '</span>';
+            return '<span class="dk ' + dks[i] + '" data-name="' + esc(names[i]) + '">' + icon(ic) + '</span>';
           }).join('') + '</div>'
       : '';
     return '<div class="screen screen--tall"><div class="screen__wall"></div>' + bar + win + dock + '</div>';
@@ -241,9 +252,10 @@
       body = '<div class="screen__hint"><span class="fs-chip">' + esc(s.hint[0]) + '</span><small>' + esc(s.hint[1]) + '</small></div>';
     } else if (s.mode === 'portrait') {
       var zones = [];
-      zones.push('<div class="menubar__zone">' + item(battHTML(0.63, '', '63%'), '电池 63%') + '</div>');
+      var pb = (typeof s.portraitBattery === 'number') ? s.portraitBattery : 0.63;
+      zones.push('<div class="menubar__zone">' + item(battHTML(pb, '', Math.round(pb * 100) + '%'), T.discharging + ' ' + Math.round(pb * 100) + '%') + '</div>');
       zones.push('<div class="menubar__zone"><span class="menubar__item menubar__clock">' + esc(s.portraitClock) + '</span></div>');
-      zones.push('<div class="menubar__zone">' + item(icon('i-cc'), '控制中心') + '</div>');
+      zones.push('<div class="menubar__zone">' + item(icon('i-cc'), T.ccLabel) + '</div>');
       body = '<div class="menubar menubar--mini menubar--slim"><div class="menubar__left"><span class="menubar__item menubar__apple">' + icon('i-apple') + '</span></div>' +
         '<div class="menubar__right">' + zones.join(sep()) + '</div></div>';
     } else if (s.mode === 'remote') {
@@ -253,8 +265,8 @@
         item(icon('i-wifi'), cfg.system.wifi.tip) + item(icon('i-sound'), cfg.system.sound.tip) +
         item(battHTML(cfg.system.battery.level, 'green'), cfg.system.battery.tip) + '</div>');
       zones2.push('<div class="menubar__zone"><span class="menubar__item menubar__conn' + (q === 'warn' ? ' menubar__conn--warn' : '') + '"' +
-        tipAttr('UU远程 · 连接质量' + (q === 'good' ? '良好' : q === 'warn' ? '一般' : '差')) + '><span class="conn-dot" aria-hidden="true"></span>' + esc(s.conn.label) + '</span></div>');
-      zones2.push('<div class="menubar__zone">' + item(icon('i-cc'), '控制中心') +
+        tipAttr(T.connTip + ' · ' + T.connQuality[q]) + '><span class="conn-dot" aria-hidden="true"></span>' + esc(s.conn.label) + '</span></div>');
+      zones2.push('<div class="menubar__zone">' + item(icon('i-cc'), T.ccLabel) +
         '<span class="menubar__item menubar__clock">' + esc(clockNow()) + '</span></div>');
       body = '<div class="menubar menubar--mini menubar--slim">' +
         '<div class="menubar__left"><span class="menubar__item menubar__apple">' + icon('i-apple') + '</span></div>' +
@@ -295,7 +307,7 @@
   function hiddenTools() { return cfg.tools.filter(function (t) { return !state.pinned[t.id]; }); }
 
   /* ================= 交互 ================= */
-  var liveTimer = null, toastTimer = null, hintTimer = null;
+  var liveTimer = null, toastTimer = null, hintTimer = null, clockStarted = false;
 
   function announce(msg) {
     var live = el('mbLive');
@@ -327,7 +339,7 @@
     var chip = el('overflowChip');
     if (chip) {
       chip.textContent = '+' + hidden.length;
-      chip.setAttribute('aria-label', T.overflowTitle + '，共 ' + hidden.length + ' 项');
+      chip.setAttribute('aria-label', T.overflowTitle + T.countSep + hidden.length + T.itemUnit);
     }
     var wrap = el('overflowWrap');
     if (wrap) { wrap.hidden = hidden.length === 0; }
@@ -342,7 +354,7 @@
         : '<div class="pop__empty">' + esc(T.overflowEmpty) + '</div>';
     }
     var cnt = el('popCount');
-    if (cnt) { cnt.textContent = hidden.length + ' 项'; }
+    if (cnt) { cnt.textContent = hidden.length + T.itemUnit; }
   }
 
   function openPop() {
@@ -379,7 +391,7 @@
     }
     state.pinned[id] = true;
     renderTools();
-    announce(t.name + ' 已置顶到工具区');
+    announce(t.name + ' · ' + T.pinnedMsg);
   }
   function unpinTool(id) {
     var t = null;
@@ -387,7 +399,7 @@
     if (!t) { return; }
     state.pinned[id] = false;
     renderTools();
-    announce(t.name + ' 已' + T.unpin);
+    announce(t.name + ' · ' + T.unpinnedMsg);
   }
 
   function bindMainMock() {
@@ -397,22 +409,6 @@
     chip.addEventListener('click', function (e) {
       e.stopPropagation();
       state.popOpen ? closePop(true) : openPop();
-    });
-    document.addEventListener('click', function (e) {
-      if (state.popOpen && pop && !pop.contains(e.target) && e.target !== chip && !chip.contains(e.target)) {
-        closePop(false);
-      }
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.popOpen) { closePop(true); }
-      /* 弹层内焦点圈定 */
-      if (e.key === 'Tab' && state.popOpen && pop) {
-        var f = pop.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
-        if (!f.length) { return; }
-        var first = f[0], last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
     });
     if (list) {
       list.addEventListener('click', function (e) {
@@ -432,6 +428,27 @@
         }
       });
     }
+  }
+
+  /* 文档级监听（仅绑定一次，重渲染不重复） */
+  function bindGlobalOnce() {
+    var pop = el('overflowPop'), chip = el('overflowChip');
+    document.addEventListener('click', function (e) {
+      if (state.popOpen && pop && !pop.contains(e.target) && e.target !== chip && !chip.contains(e.target)) {
+        closePop(false);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.popOpen) { closePop(true); }
+      /* 弹层内焦点圈定 */
+      if (e.key === 'Tab' && state.popOpen && pop) {
+        var f = pop.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+        if (!f.length) { return; }
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
   }
 
   /* ================= 控制条 ================= */
@@ -459,13 +476,13 @@
     document.body.classList.toggle('show-anno', state.annotations);
     var btn = el('annoBtn');
     if (btn) {
-      btn.textContent = state.annotations ? '隐藏标注' : '显示标注';
+      btn.textContent = state.annotations ? T.annoHide : T.annoShow;
       btn.setAttribute('aria-pressed', String(state.annotations));
     }
   }
   function exportConfig() {
     var json = JSON.stringify(cfg, null, 2);
-    function ok() { showToast('配置 JSON 已复制到剪贴板'); }
+    function ok() { showToast(T.copiedMsg); }
     function fallback() {
       var ta = document.createElement('textarea');
       ta.value = json;
@@ -475,7 +492,7 @@
       document.body.appendChild(ta);
       ta.select();
       try { document.execCommand('copy'); ok(); }
-      catch (err) { showToast('复制失败，JSON 已输出到控制台'); if (root.console) { console.log(json); } }
+      catch (err) { showToast(T.copyFailMsg); if (root.console) { console.log(json); } }
       document.body.removeChild(ta);
     }
     if (root.navigator && root.navigator.clipboard && root.navigator.clipboard.writeText) {
@@ -489,6 +506,12 @@
       themeBtns[i].addEventListener('click', function () {
         state.theme = this.getAttribute('data-theme');
         applyTheme();
+      });
+    }
+    var langBtns = document.querySelectorAll('[data-lang]');
+    for (var l = 0; l < langBtns.length; l++) {
+      langBtns[l].addEventListener('click', function () {
+        setLocale(this.getAttribute('data-lang'));
       });
     }
     var densBtns = document.querySelectorAll('[data-density]');
@@ -513,8 +536,8 @@
         cfg.tools.forEach(function (t) { state.pinned[t.id] = !!t.pinned; });
         closePop(false);
         renderTools();
-        showToast('演示已重置');
-        announce('演示已重置');
+        showToast(T.resetMsg);
+        announce(T.resetMsg);
       });
     }
     if (mq && mq.addEventListener) {
@@ -523,25 +546,42 @@
   }
 
   /* ================= 挂载 ================= */
-  /* 注意：#legacyMock / #mainMock 容器内已含 .screen__wall，
-     故使用 insertAdjacentHTML 追加，避免覆盖墙体。 */
-  function mount() {
+  /* 每次重渲染都重建墙体 + 内容，保证墙体不被覆盖且可被语言切换复用。 */
+  function wallHTML() { return '<div class="screen__wall"></div>'; }
+  function renderLegacy() {
     var legacy = el('legacyMock');
-    if (legacy) { legacy.insertAdjacentHTML('beforeend', buildLegacyBar() + dockHTML()); }
+    if (legacy) { legacy.innerHTML = wallHTML() + buildLegacyBar() + dockHTML(); }
+  }
+  function renderMain() {
     var main = el('mainMock');
-    if (main) { main.insertAdjacentHTML('beforeend', buildMainBar() + windowHTML(cfg.screens.stage[0].window) + dockHTML()); }
+    if (main) { main.innerHTML = wallHTML() + buildMainBar() + windowHTML(cfg.screens.stage[0].window) + dockHTML(); }
+  }
+  function renderMatrix() {
     var matrix = el('matrix');
     if (matrix) { matrix.innerHTML = buildMatrix(); }
+  }
+  function renderScreens() {
     var screens = el('multiscreen');
     if (screens) { screens.innerHTML = buildScreens(); }
+  }
+  function renderAll() {
+    renderLegacy();
+    renderMain();
+    renderMatrix();
+    renderScreens();
     renderTools();
+    applyTheme();
+    applyDensity();
+    applyAnnotations();
+    bindMainMock();
+    startClock();
   }
   function dockHTML() {
     return '<div class="dock">' + ['i-dock-finder', 'i-dock-safari', 'i-wechat', 'i-dock-terminal', 'i-dock-code', 'i-letter-z']
       .map(function (ic, i) {
-        var names = ['Finder', 'Safari', '微信', '终端', 'VS Code', 'Zotero'];
+        var names = T.dockNames;
         var dks = ['dk--finder', 'dk--safari', 'dk--wechat', 'dk--terminal', 'dk--code', 'dk--zotero'];
-        return '<span class="dk ' + dks[i] + '" data-name="' + names[i] + '">' + icon(ic) + '</span>';
+        return '<span class="dk ' + dks[i] + '" data-name="' + esc(names[i]) + '">' + icon(ic) + '</span>';
       }).join('') + '</div>';
   }
   function windowHTML(w) {
@@ -551,29 +591,47 @@
 
   /* 实时时钟（15s 粒度，跨天自动翻转） */
   function startClock() {
+    if (clockStarted) { return; }
     var node = el('clockLive');
     if (!node) { return; }
+    clockStarted = true;
     function tick() { node.textContent = clockNow(); }
     tick();
     setInterval(tick, 15000);
   }
 
+  /* ================= 语言切换 ================= */
+  function setLocale(locale) {
+    if (!MBR.i18n[locale]) { return; }
+    cfg.meta.locale = locale;
+    T = MBR.i18n[locale] || {};
+    if (root.document) { root.document.documentElement.lang = locale; }
+    renderAll();
+    var langBtns = document.querySelectorAll('[data-lang]');
+    for (var i = 0; i < langBtns.length; i++) {
+      var on = langBtns[i].getAttribute('data-lang') === locale;
+      langBtns[i].classList.toggle('seg__btn--active', on);
+      langBtns[i].setAttribute('aria-pressed', String(on));
+    }
+  }
+
   /* ================= 初始化 ================= */
   function init() {
-    if (!cfg.tools) { if (root.console) { console.error('[MBR] config 缺失，请检查 src/js/config.js'); } return; }
-    mount();
+    if (!cfg.tools) { if (root.console) { console.error(T.configMissing); } return; }
+    renderAll();
+    bindGlobalOnce();
     bindControls();
-    bindMainMock();
-    applyTheme();
-    applyDensity();
-    applyAnnotations();
-    startClock();
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', function () { if (state.theme === 'auto') { applyTheme(); } });
+    }
   }
 
   var app = {
     init: init,
     state: state,
     config: cfg,
+    setLocale: setLocale,
+    renderAll: renderAll,
     /* 纯函数导出（供测试与二次开发） */
     builders: {
       esc: esc, fmtBadge: fmtBadge, clockNow: clockNow,
